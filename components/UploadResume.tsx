@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { getToken } from "@/utils/auth";
 
 interface AnalysisResult {
   score: number;
@@ -40,17 +39,13 @@ export default function UploadResume({ onResult }: UploadResumeProps) {
       setIsLoading(true);
 
       try {
-        const token = getToken();
-
         // Step 1: Upload file
         const formData = new FormData();
         formData.append("file", file);
 
-        const uploadRes = await fetch("http://127.0.0.1:8000/api/upload/", {
+        const uploadRes = await fetch("/api/backend/upload", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
           body: formData,
         });
 
@@ -62,12 +57,12 @@ export default function UploadResume({ onResult }: UploadResumeProps) {
         const uploadData = await uploadRes.json();
 
         // Step 2: Analyze the uploaded resume
-        const analyzeRes = await fetch("http://127.0.0.1:8000/api/analyze/", {
+        const analyzeRes = await fetch("/api/backend/analyze", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
           body: JSON.stringify({ resume_id: uploadData.resume_id }),
         });
 
@@ -78,11 +73,14 @@ export default function UploadResume({ onResult }: UploadResumeProps) {
 
         const result = await analyzeRes.json();
         setUploadSuccess(true);
-        onResult({
-          score: result.score,
-          missingSkills: result.missing_skills,
-          suggestions: result.suggestions,
-        }, uploadData.resume_id);
+        onResult(
+          {
+            score: result.score,
+            missingSkills: result.missing_skills,
+            suggestions: result.suggestions,
+          },
+          uploadData.resume_id
+        );
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
@@ -118,7 +116,7 @@ export default function UploadResume({ onResult }: UploadResumeProps) {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={() => fileInputRef.current?.click()}
-        className={`group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed p-14 text-center transition-all duration-300 ${
+        className={`group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-300 sm:rounded-3xl sm:p-14 ${
           isDragging
             ? "border-indigo-400 bg-indigo-50/80 shadow-xl shadow-indigo-500/10"
             : uploadSuccess
@@ -134,52 +132,50 @@ export default function UploadResume({ onResult }: UploadResumeProps) {
 
         {isLoading ? (
           <div className="relative flex flex-col items-center gap-4">
-            {/* Animated loader */}
             <div className="relative">
-              <div className="h-16 w-16 rounded-full border-3 border-indigo-100" />
-              <div className="absolute inset-0 h-16 w-16 animate-spin rounded-full border-3 border-transparent border-t-indigo-500" style={{ animationDuration: '1s' }} />
+              <div className="h-14 w-14 rounded-full border-3 border-indigo-100 sm:h-16 sm:w-16" />
+              <div className="absolute inset-0 h-14 w-14 animate-spin rounded-full border-3 border-transparent border-t-indigo-500 sm:h-16 sm:w-16" style={{ animationDuration: "1s" }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <svg className="h-6 w-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <svg className="h-5 w-5 text-indigo-500 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
                 </svg>
               </div>
             </div>
             <div>
               <p className="text-sm font-semibold text-indigo-700">Analyzing your resume...</p>
-              <p className="mt-1 text-xs text-indigo-500/70">{fileName}</p>
+              <p className="mt-1 max-w-[200px] truncate text-xs text-indigo-500/70">{fileName}</p>
             </div>
-            {/* Progress bar shimmer */}
-            <div className="h-1.5 w-48 overflow-hidden rounded-full bg-indigo-100">
-              <div className="h-full w-full animate-shimmer rounded-full bg-gradient-to-r from-indigo-200 via-indigo-500 to-indigo-200" style={{ backgroundSize: '200% 100%' }} />
+            <div className="h-1.5 w-40 overflow-hidden rounded-full bg-indigo-100 sm:w-48">
+              <div className="h-full w-full animate-shimmer rounded-full bg-gradient-to-r from-indigo-200 via-indigo-500 to-indigo-200" style={{ backgroundSize: "200% 100%" }} />
             </div>
           </div>
         ) : (
           <div className="relative">
-            <div className={`mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl transition-all duration-300 ${
-              uploadSuccess
-                ? "bg-emerald-100"
-                : "bg-gradient-to-br from-indigo-50 to-purple-50 group-hover:from-indigo-100 group-hover:to-purple-100 group-hover:scale-110"
-            }`}>
+            <div
+              className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 sm:mb-5 sm:h-20 sm:w-20 sm:rounded-3xl ${
+                uploadSuccess
+                  ? "bg-emerald-100"
+                  : "bg-gradient-to-br from-indigo-50 to-purple-50 group-hover:from-indigo-100 group-hover:to-purple-100 group-hover:scale-110"
+              }`}
+            >
               {uploadSuccess ? (
-                <svg className="h-10 w-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <svg className="h-8 w-8 text-emerald-500 sm:h-10 sm:w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               ) : (
-                <svg className="h-10 w-10 text-indigo-400 transition-transform duration-300 group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <svg className="h-8 w-8 text-indigo-400 transition-transform duration-300 group-hover:-translate-y-1 sm:h-10 sm:w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                 </svg>
               )}
             </div>
-            <p className="text-base font-semibold text-slate-700">
-              {uploadSuccess
-                ? "Upload another resume"
-                : "Drop your resume here or click to browse"}
+            <p className="text-sm font-semibold text-slate-700 sm:text-base">
+              {uploadSuccess ? "Upload another resume" : "Drop your resume here or click to browse"}
             </p>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-1.5 text-xs text-slate-400 sm:mt-2 sm:text-sm">
               PDF only, max 5MB
             </p>
             {!uploadSuccess && (
-              <div className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-4 py-2 text-xs font-medium text-indigo-600 transition-colors group-hover:bg-indigo-100">
+              <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 transition-colors group-hover:bg-indigo-100 sm:mt-5 sm:rounded-xl sm:px-4 sm:py-2">
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>

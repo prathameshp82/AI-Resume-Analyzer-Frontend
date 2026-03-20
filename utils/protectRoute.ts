@@ -2,19 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken } from "./auth";
+import { isAuthenticated } from "./auth";
 
 export function useProtectedRoute() {
   const router = useRouter();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.replace("/login");
-    } else {
+    void (async () => {
+      const authed = await isAuthenticated();
+      if (!authed) {
+        router.replace("/login");
+        return;
+      }
       setChecked(true);
-    }
+    })();
   }, [router]);
 
   return checked;

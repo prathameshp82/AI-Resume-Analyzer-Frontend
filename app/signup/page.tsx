@@ -14,9 +14,12 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      router.replace("/dashboard");
-    }
+    void (async () => {
+      const authed = await isAuthenticated();
+      if (authed) {
+        router.replace("/dashboard");
+      }
+    })();
   }, [router]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -35,25 +38,24 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center mesh-gradient px-4">
+    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center mesh-gradient px-4 py-8 sm:min-h-[calc(100vh-73px)] sm:py-0">
       <div className="animate-scale-in w-full max-w-md">
-        {/* Card */}
-        <div className="rounded-3xl border border-white/60 bg-white/80 p-10 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl sm:rounded-3xl sm:p-10">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25">
-              <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <div className="mb-6 text-center sm:mb-8">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25 sm:mb-4 sm:h-14 sm:w-14 sm:rounded-2xl">
+              <svg className="h-6 w-6 text-white sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">Create Account</h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Create Account</h1>
+            <p className="mt-1.5 text-sm text-slate-500">
               Sign up to start analyzing your resume
             </p>
           </div>
 
           {error && (
-            <div className="animate-fade-in mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="animate-fade-in mb-5 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 sm:mb-6">
               <svg className="h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
@@ -61,12 +63,9 @@ export default function SignupPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
-              <label
-                htmlFor="username"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="username" className="mb-1.5 block text-sm font-semibold text-slate-700">
                 Username
               </label>
               <input
@@ -81,10 +80,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-slate-700">
                 Email
               </label>
               <input
@@ -99,10 +95,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-slate-700">
                 Password
               </label>
               <input
@@ -135,13 +128,10 @@ export default function SignupPage() {
             </button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center sm:mt-8">
             <p className="text-sm text-slate-500">
               Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700"
-              >
+              <Link href="/login" className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700">
                 Sign In
               </Link>
             </p>

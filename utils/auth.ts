@@ -1,84 +1,67 @@
-const API_BASE = "http://127.0.0.1:8000";
-
-interface LoginResponse {
-  access: string;
-  refresh: string;
+interface SessionResponse {
+  authenticated: boolean;
+  username: string | null;
 }
 
-interface RegisterResponse {
-  id: number;
-  username: string;
-  email: string;
+async function safeJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
-export async function loginUser(
-  username: string,
-  password: string
-): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE}/api/token/`, {
+export async function loginUser(username: string, password: string): Promise<void> {
+  const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ username, password }),
   });
 
-  const data = await res.json();
-
   if (!res.ok) {
-    throw new Error(
-      data.detail || data.non_field_errors?.[0] || "Invalid credentials"
-    );
+    throw new Error("Invalid username or password.");
   }
-
-  localStorage.setItem("access_token", data.access);
-  localStorage.setItem("refresh_token", data.refresh);
-  localStorage.setItem("username", username);
-
-  return data;
 }
 
-export async function registerUser(
-  username: string,
-  email: string,
-  password: string
-): Promise<RegisterResponse> {
-  const res = await fetch(`${API_BASE}/api/users/register/`, {
+export async function registerUser(username: string, email: string, password: string): Promise<void> {
+  const res = await fetch("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ username, email, password }),
   });
 
-  const data = await res.json();
-
   if (!res.ok) {
-    const message =
-      data.username?.[0] ||
-      data.email?.[0] ||
-      data.password?.[0] ||
-      data.detail ||
-      "Registration failed";
-    throw new Error(message);
+    throw new Error("Unable to register with the provided details.");
   }
-
-  return data;
 }
 
-export function logout(): void {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  localStorage.removeItem("username");
+export async function logout(): Promise<void> {
+  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
   window.location.href = "/login";
 }
 
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("access_token");
+export async function getSession(): Promise<SessionResponse> {
+  const res = await fetch("/api/auth/session", { credentials: "include", cache: "no-store" });
+  const data = (await safeJson(res)) as SessionResponse | null;
+
+  if (!res.ok || !data) {
+    return { authenticated: false, username: null };
+  }
+
+  return {
+    authenticated: !!data.authenticated,
+    username: data.username || null,
+  };
 }
 
-export function getUsername(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("username");
+export async function isAuthenticated(): Promise<boolean> {
+  const session = await getSession();
+  return session.authenticated;
 }
 
-export function isAuthenticated(): boolean {
-  return !!getToken();
+export async function getUsername(): Promise<string | null> {
+  const session = await getSession();
+  return session.username;
 }
