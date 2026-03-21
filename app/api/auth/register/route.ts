@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendUrl } from "@/lib/backendApi";
 
+async function safeJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -20,9 +28,24 @@ export async function POST(req: NextRequest) {
     });
 
     if (!upstreamResponse.ok) {
+      const data = await safeJson(upstreamResponse);
+      const backendError =
+        (data && typeof data === "object" && "error" in data && typeof data.error === "string" && data.error) ||
+        (data && typeof data === "object" && "detail" in data && typeof data.detail === "string" && data.detail) ||
+        null;
+
+      // Bubble up useful validation/conflict errors to users.
+      if (upstreamResponse.status >= 400 && upstreamResponse.status < 500) {
+        return NextResponse.json(
+          { error: backendError || "Unable to register with the provided details." },
+          { status: upstreamResponse.status }
+        );
+      }
+
+      console.error("Register upstream error:", upstreamResponse.status, data);
       return NextResponse.json(
         { error: "Unable to register with the provided details." },
-        { status: upstreamResponse.status }
+        { status: 500 }
       );
     }
 

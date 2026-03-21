@@ -33,7 +33,11 @@ export async function registerUser(username: string, email: string, password: st
   });
 
   if (!res.ok) {
-    throw new Error("Unable to register with the provided details.");
+    const data = await safeJson(res);
+    const message =
+      (data && typeof data === "object" && "error" in data && typeof data.error === "string" && data.error) ||
+      "Unable to register with the provided details.";
+    throw new Error(message);
   }
 }
 

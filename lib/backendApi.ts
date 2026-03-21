@@ -1,18 +1,22 @@
 const DEFAULT_BACKEND_API_URL = "http://127.0.0.1:8000";
 
 export function getBackendApiBaseUrl(): string {
-  const rawBaseUrl = process.env.BACKEND_API_URL || DEFAULT_BACKEND_API_URL;
+  // Support legacy env key to avoid breaking existing local setups.
+  const rawBaseUrl =
+    process.env.BACKEND_API_URL ||
+    process.env.BACKEND_API_BASE_URL ||
+    DEFAULT_BACKEND_API_URL;
   const baseUrl = rawBaseUrl.replace(/\/+$/, "");
 
   if (!/^https?:\/\//.test(baseUrl)) {
-    throw new Error("BACKEND_API_URL must include http:// or https://");
+    throw new Error("BACKEND_API_URL (or BACKEND_API_BASE_URL) must include http:// or https://");
   }
 
   const isLocalhostHttp = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseUrl);
   const isInsecureHttp = baseUrl.startsWith("http://");
 
   if (process.env.NODE_ENV === "production" && isInsecureHttp && !isLocalhostHttp) {
-    throw new Error("BACKEND_API_URL must use HTTPS in production");
+    throw new Error("BACKEND_API_URL (or BACKEND_API_BASE_URL) must use HTTPS in production");
   }
 
   return baseUrl;
