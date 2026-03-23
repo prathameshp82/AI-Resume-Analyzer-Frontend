@@ -7,6 +7,8 @@ import JobMatch from "@/components/JobMatch";
 import JobMatchResult from "@/components/JobMatchResult";
 import JobMatchDashboard from "@/components/JobMatchDashboard";
 import ImproveResume from "@/components/ImproveResume";
+import OptimizeResume from "@/components/OptimizeResume";
+import OptimizedHistory from "@/components/OptimizedHistory";
 import { useProtectedRoute } from "@/utils/protectRoute";
 import { getSession } from "@/utils/auth";
 
@@ -51,7 +53,7 @@ export default function DashboardPage() {
   const [jobMatchHistoryLoading, setJobMatchHistoryLoading] = useState(false);
 
   // Active tab
-  const [activeTab, setActiveTab] = useState<"analyze" | "jobmatch" | "improve">("analyze");
+  const [activeTab, setActiveTab] = useState<"analyze" | "jobmatch" | "improve" | "optimize">("analyze");
 
   useEffect(() => {
     void (async () => {
@@ -213,6 +215,19 @@ export default function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
             Improve
+          </button>
+          <button
+            onClick={() => setActiveTab("optimize")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-[11px] font-semibold transition-all duration-300 sm:gap-2 sm:px-4 sm:py-3 sm:text-sm ${
+              activeTab === "optimize"
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+            </svg>
+            Optimize
           </button>
         </div>
 
@@ -516,6 +531,17 @@ export default function DashboardPage() {
         <div className={`flex flex-col items-center gap-8 sm:gap-10 ${activeTab === "improve" ? "" : "hidden"}`}>
           <div className="animate-fade-in-up w-full" style={{ animationFillMode: "both" }}>
             <ImproveResume resumeId={resumeId} />
+          </div>
+        </div>
+
+        {/* ===== OPTIMIZE RESUME TAB ===== */}
+        <div className={`flex flex-col items-center gap-8 sm:gap-10 ${activeTab === "optimize" ? "" : "hidden"}`}>
+          <div className="animate-fade-in-up w-full" style={{ animationFillMode: "both" }}>
+            <OptimizeResume resumeId={resumeId} />
+          </div>
+
+          <div className="animate-fade-in-up delay-200 w-full" style={{ animationFillMode: "both" }}>
+            <OptimizedHistory />
           </div>
         </div>
       </div>

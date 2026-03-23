@@ -100,6 +100,16 @@ body {
   animation: shimmer 2s infinite;
 }
 
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+
+/* Line clamp utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Staggered animation delays */
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
@@ -191,6 +201,12 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Resume preview inner scrollbar */
+.resume-preview::-webkit-scrollbar { width: 4px; }
+.resume-preview::-webkit-scrollbar-track { background: transparent; }
+.resume-preview::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+.resume-preview::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
 
 /* ===== MOBILE RESPONSIVE HELPERS ===== */
 @media (max-width: 640px) {
